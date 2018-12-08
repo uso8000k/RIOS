@@ -49,13 +49,17 @@ Vagrant.configure("2") do |config|
     apt-get install -y wget git 
     wget -qO- https://get.docker.com/ | sh
     echo "########################################"
-    cd  /mnt/build
-    git clone https://github.com/opencomputeproject/OpenNetworkLinux
-    cd OpenNetworkLinux
-    docker/tools/onlbuilder -8
-    apt-cacher-ng
-    source setup.env 
-    make amd64
+    cat << EOF > build
+\#!/bin/bash
+cd  /mnt/build
+git clone https://github.com/opencomputeproject/OpenNetworkLinux
+cd OpenNetworkLinux
+docker/tools/onlbuilder -8
+apt-cacher-ng
+source setup.env 
+make amd64
+EOF
     echo "########################################"
+    chmod 755 build
   SHELL
 end
