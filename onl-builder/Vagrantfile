@@ -51,13 +51,20 @@ Vagrant.configure("2") do |config|
     echo "########################################"
     cat << EOF > build
 \#!/bin/bash
+
 cd  /mnt/build
 git clone https://github.com/opencomputeproject/OpenNetworkLinux
 cd OpenNetworkLinux
-docker/tools/onlbuilder -8
-apt-cacher-ng
-source setup.env 
-make amd64
+
+\# Enter command into container from stdin
+\# apt-cacher-ng
+\# source setup.env 
+\# make amd64
+\# exit
+\# exit
+
+printf apt-cacher-ng\n source setup.env\n make amd64\n exit\n exit\n | docker/tools/onlbuilder -8
+
 EOF
     echo "########################################"
     chmod 755 build
