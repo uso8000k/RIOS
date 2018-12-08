@@ -1,0 +1,6 @@
+#/bin/sh
+
+cd /opt/onie/build-config/
+su builduser -c "PATH=$PATH:/sbin:/usr/sbin make -j4 MACHINE=$1 all recovery-iso"
+
+cp /opt/onie/build/images/* /tmp/images

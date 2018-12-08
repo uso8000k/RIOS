@@ -1,0 +1,61 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby : 
+## Requirement
+# * vagrant plugin install vagrant-vbguest
+# * vagrant plugin install vagrant-disksize
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "debian/jessie64"
+  config.vm.box_check_update = true
+  config.vm.synced_folder "./images", "/tmp/images"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+    vb.memory = "4096"
+    file_to_disk = './tmp/disk.vdi'
+    if not File.exist?(file_to_disk) then
+      vb.customize ["createhd",
+                    "--filename", file_to_disk,
+                    "--size", 40 * 1024]
+    end
+    vb.customize ['storageattach', :id,
+                  '--storagectl', 'SATA Controller',
+                  '--port', 1,
+                  '--device', 0,
+                  '--type', 'hdd',
+                  '--medium', file_to_disk]
+  end
+  
+  if Vagrant.has_plugin?("vagrant-vbguest") then
+    config.vbguest.auto_update = true # In touble, change false
+  end
+
+  #if Vagrant.has_plugin?("vagrant-disksize") then
+  #  config.disksize.size = '80GB'
+  #end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    echo "########################################"
+    printf "n\np\n1\n\n+20G\n\nn\np\n2\n\n\n\nw\n" | fdisk /dev/sdb
+    mkfs.ext4 /dev/sdb1
+    mkfs.ext4 /dev/sdb2
+    mkdir -p /mnt/build
+    mkdir -p /var/lib/docker
+    mount /dev/sdb1 /mnt/build
+    mount /dev/sdb2 /var/lib/docker
+    echo "########################################"
+    apt-get update
+    apt-get install -y wget git 
+    wget -qO- https://get.docker.com/ | sh
+    echo "########################################"
+    cd  /mnt/build
+    git clone https://github.com/opencomputeproject/OpenNetworkLinux
+    cd OpenNetworkLinux
+    docker/tools/onlbuilder -8
+    apt-cacher-ng
+    source setup.env 
+    make amd64
+    echo "########################################"
+  SHELL
+end
