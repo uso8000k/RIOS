@@ -4,6 +4,7 @@ Routing Integration OS
 
 # Architecture (plan)
 
+```
 +------------+
 | frr (&etc) |
 +------------+
@@ -13,5 +14,6 @@ Routing Integration OS
 +------+-----+
 |   WBS/VM   |
 +------------+
+```
 
 * Running on WBS (WhiteBoxSwitch) and VM are planned.
